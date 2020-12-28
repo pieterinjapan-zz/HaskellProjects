@@ -5,9 +5,9 @@ Updated : 2019-07-02
 
 Tautology Checker :
 
-Given a proposition, the program checks whether it is a Tautology 
-(true regardless of the truth values of its constituent propositions) 
-or not. 
+Given a proposition, the program checks whether it is a Tautology
+(true regardless of the truth values of its constituent propositions)
+or not.
 -}
 
 ------------------------------------------------
@@ -30,14 +30,14 @@ data Prop = Const Bool       -- truth value
    table -}
 instance Eq Prop where
   p == q = truthTab p == truthTab q
-  
+
 -- associating boolean values to propositions :
 type Assoc k v = [(k,v)]
-type Subst = Assoc Char Bool -- ex [('A',True)] assigns True to 'A'  
-  
+type Subst = Assoc Char Bool -- ex [('A',True)] assigns True to 'A'
+
 ------------------------------------------------
 -- Functions :
-------------------------------------------------  
+------------------------------------------------
 
 -- function returning the first value v for an associated key k in Assoc k v :
 find :: Eq k => k -> Assoc k v -> v
@@ -87,7 +87,6 @@ truthTab p = ( map (\s -> eval s p) . subst ) p
 
 -- test whether given proposition is a tautology :
 isTaut :: Prop -> Bool
---isTaut p = and (map (\s -> eval s p) (subst p) )
 isTaut = and . truthTab
 
 -- test propositions :
