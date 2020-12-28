@@ -21,6 +21,9 @@ data Prop = Const Bool       -- truth value
           | Eq Prop Prop     -- equivalence
   deriving (Show)
 
+-- TODO : add alternate Show functionality for propositions (Prop -> String)
+-- TODO : add read functionality, so proposition can be input as a String (String -> Prop)
+
 -- making Prop an intance of Eq :
 {- here we declare two propositions to be
    equivalent if they share the same truth
@@ -56,7 +59,7 @@ p_A <--> p_B = Eq p_A p_B
 find :: Eq k => k -> Assoc k v -> v
 find k t = head [ v | (k',v) <- t, k' == k ]
 
--- nterface between propositions and Truth values
+-- interface between propositions and Truth values
 -- Given a list of substitutions for atomic propositions
 -- evaluates the Truth value of a given proposition
 eval :: Subst -> Prop -> Bool
@@ -100,8 +103,12 @@ subst p = map (zip vp) bss
 truthTable :: Prop -> [Bool]
 truthTable p = ( map (\s -> eval s p) . subst ) p
 
+-- TODO : add Show functionality for truth table (Prop -> IO ())
+
 -- test whether given proposition is a tautology
 isTautology :: Prop -> Bool
 isTautology = and . truthTable
+
+-- TODO : add equivalence checker
 
 -- END
