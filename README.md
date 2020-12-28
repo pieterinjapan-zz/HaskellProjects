@@ -10,6 +10,6 @@ test modules.
 * Nim
 * Speller
 * StarMan
-* TautologyChecker
+* PropositionalLogicCalculator
 * TicTacToe
 * TowerOfHanoi

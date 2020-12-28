@@ -46,11 +46,11 @@ p_A /\ p_B = And p_A p_B
 (\/) :: Prop -> Prop -> Prop -- disjunction
 p_A \/ p_B = Or p_A p_B
 
-(==>) :: Prop -> Prop -> Prop -- implication
-p_A ==> p_B = Imply p_A p_B
+(-->) :: Prop -> Prop -> Prop -- implication
+p_A --> p_B = Imply p_A p_B
 
-(<==>) :: Prop -> Prop -> Prop -- equivalence
-p_A <==> p_B = Eq p_A p_B
+(<-->) :: Prop -> Prop -> Prop -- equivalence
+p_A <--> p_B = Eq p_A p_B
 
 -- function returning the first value v for an associated key k in Assoc k v
 find :: Eq k => k -> Assoc k v -> v
