@@ -1,14 +1,11 @@
 {-
 Pieter van Wyk
 Created : 2019-05-24
-Updated : 2019-07-02
+Updated : 2020-12-28
 
-Tautology Checker :
-
-Given a proposition, the program checks whether it is a Tautology
-(true regardless of the truth values of its constituent propositions)
-or not.
+Implementation of a propositional logic calculator
 -}
+module PropositionalLogicCalculator where
 
 ------------------------------------------------
 -- Data Types and Instances :
@@ -29,7 +26,7 @@ data Prop = Const Bool       -- truth value
    equivalent if they share the same truth
    table -}
 instance Eq Prop where
-  p == q = truthTab p == truthTab q
+  p == q = truthTable p == truthTable q
 
 -- associating boolean values to propositions :
 type Assoc k v = [(k,v)]
@@ -39,11 +36,29 @@ type Subst = Assoc Char Bool -- ex [('A',True)] assigns True to 'A'
 -- Functions :
 ------------------------------------------------
 
--- function returning the first value v for an associated key k in Assoc k v :
+-- representations for Prop Types
+neg :: Prop -> Prop
+neg p_A = Not p_A
+
+(/\) :: Prop -> Prop -> Prop -- conjucntion
+p_A /\ p_B = And p_A p_B
+
+(\/) :: Prop -> Prop -> Prop -- disjunction
+p_A \/ p_B = Or p_A p_B
+
+(==>) :: Prop -> Prop -> Prop -- implication
+p_A ==> p_B = Imply p_A p_B
+
+(<==>) :: Prop -> Prop -> Prop -- equivalence
+p_A <==> p_B = Eq p_A p_B
+
+-- function returning the first value v for an associated key k in Assoc k v
 find :: Eq k => k -> Assoc k v -> v
 find k t = head [ v | (k',v) <- t, k' == k ]
 
--- function for evaluating propositions :
+-- nterface between propositions and Truth values
+-- Given a list of substitutions for atomic propositions
+-- evaluates the Truth value of a given proposition
 eval :: Subst -> Prop -> Bool
 eval _ ( Const b )   = b
 eval s ( Var x )     = find x s
@@ -53,7 +68,7 @@ eval s ( Or  p q )   = ( eval s p ) || ( eval s q )
 eval s ( Imply p q ) = ( not ( eval s p ) ) || ( eval s q )
 eval s ( Eq  p q )   = ( eval s p ) == ( eval s q )
 
--- function for extracting atomic proposition names from a composite proposition :
+-- function for extracting atomic proposition names from a composite proposition
 vars :: Prop -> [Char]
 vars ( Const _ )   = []
 vars ( Var x )     = [x]
@@ -63,47 +78,30 @@ vars ( Or  p q )   = vars p ++ vars q
 vars ( Imply p q ) = vars p ++ vars q
 vars ( Eq p q )    = vars p ++ vars q
 
--- remove duplicates from a list :
+-- remove duplicates from a list
 rmdups [] = []
 rmdups (x:ls) = x : ( filter (/= x) (rmdups ls) )
 
--- produce all the possible configurations of n booleans :
+-- produce all the possible configurations of n booleans
 bools :: Int -> [[Bool]]
 bools 0 = [[]]
 bools n = map (False :) bss ++ map (True :) bss
         where
           bss = bools (n-1)
 
--- substitute possible truth values for a given proposition :
+-- substitute possible truth values for a given proposition
 subst :: Prop -> [Subst]
 subst p = map (zip vp) bss
         where
           vp  = ( rmdups . vars ) p
           bss = bools ( length vp )
 
--- generate truth table for proposition :
-truthTab :: Prop -> [Bool]
-truthTab p = ( map (\s -> eval s p) . subst ) p
+-- generate truth table for proposition
+truthTable :: Prop -> [Bool]
+truthTable p = ( map (\s -> eval s p) . subst ) p
 
--- test whether given proposition is a tautology :
-isTaut :: Prop -> Bool
-isTaut = and . truthTab
+-- test whether given proposition is a tautology
+isTautology :: Prop -> Bool
+isTautology = and . truthTable
 
--- test propositions :
-p1 :: Prop
-p1 = And ( Var 'A' ) ( Not ( Var 'A' ) )
-
-p2 :: Prop
-p2 = Imply ( And ( Var 'A' ) ( Var 'B' ) ) ( Var 'A' )
-
-p3 :: Prop
-p3 = Imply ( Var 'A' ) ( And ( Var 'A' ) ( Var 'B' ) )
-
-p4 :: Prop
-p4 = Imply ( And ( Var 'A' ) ( Imply ( Var 'A' ) ( Var 'B' ) ) ) ( Var 'B' )
-
-p5 :: Prop
-p5 = Imply ( Imply ( Var 'A') ( Var 'B') ) ( Or ( Not ( Var 'A' ) ) ( Var 'B' ) )
-
-p6 :: Prop
-p6 = Eq ( Or ( Var 'B' ) ( Var 'A' ) ) ( Or ( Var 'A' ) ( Var 'B' ) )
+-- END
