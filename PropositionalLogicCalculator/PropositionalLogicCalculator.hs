@@ -19,12 +19,24 @@ data Prop = Const Bool       -- truth value
           | Or  Prop Prop    -- disjunction
           | Imply Prop Prop  -- implication
           | Eq Prop Prop     -- equivalence
-  deriving (Show)
 
--- TODO : add alternate Show functionality for propositions (Prop -> String)
+-- making Prop an intance of Show
+instance Show Prop where
+  show prop = case prop of
+    Const b -> show b
+    Var x   -> [x]
+    Not p   -> case p of
+      Const b -> show (not b)
+      _       -> "(~" ++ show p ++ ")"
+    And p q -> showBinary p q " and "
+    Or p q  -> showBinary p q " or "
+    Imply p q -> showBinary p q " --> "
+    Eq  p q -> showBinary p q " <--> "
+    where showBinary p q str = "(" ++ show p ++ str ++ show q ++ ")"
+
 -- TODO : add read functionality, so proposition can be input as a String (String -> Prop)
 
--- making Prop an intance of Eq :
+-- make Prop an intance of Eq
 {- here we declare two propositions to be
    equivalent if they share the same truth
    table -}

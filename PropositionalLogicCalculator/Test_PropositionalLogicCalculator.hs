@@ -22,7 +22,14 @@ showTestResult b str = putStrLn $ showTestResult' b str
 -- Unit Tests --
 ----------------
 
--- test propositions
+-- test propositions for show
+p_00 = Const True
+p_01 = Const False
+p_02 = Not p_01
+p_03 = Not (Var 'A')
+p_04 = And (Var 'A') (Var 'B')
+
+-- test propositions for tautology checker
 p_A =  Var 'A'
 p_B =  Var 'B'
 
