@@ -35,6 +35,24 @@ instance Show Prop where
     where showBinary p q str = "(" ++ show p ++ str ++ show q ++ ")"
 
 -- TODO : add read functionality, so proposition can be input as a String (String -> Prop)
+-- i) parse string into tree
+data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
+ deriving (Show)
+
+--parse :: String -> Tree String
+parse str | len == 1 = let h_str_s = head str_s
+                       in case h_str_s of
+                         '~':s -> Node1 "~" (parse s)
+                         _     -> Leaf h_str_s
+          | otherwise = let [prop_L,conector,prop_R] = str_s
+                        in Node2 conector (parse prop_L) (parse prop_R)
+  where str' = if str!!0 == '('
+               then tail $ init str
+               else str
+        str_s = words str'
+        len = length str_s
+
+-- ii) map tree into proposition
 
 -- make Prop an intance of Eq
 {- here we declare two propositions to be
