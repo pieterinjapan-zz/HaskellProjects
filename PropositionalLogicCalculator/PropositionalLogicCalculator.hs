@@ -39,18 +39,39 @@ instance Show Prop where
 data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
  deriving (Show)
 
---parse :: String -> Tree String
+-- main parser function
+parse :: String -> Tree String
 parse str | len == 1 = let h_str_s = head str_s
                        in case h_str_s of
                          '~':s -> Node1 "~" (parse s)
                          _     -> Leaf h_str_s
           | otherwise = let [prop_L,conector,prop_R] = str_s
                         in Node2 conector (parse prop_L) (parse prop_R)
-  where str' = if str!!0 == '('
-               then tail $ init str
-               else str
-        str_s = words str'
+  where str_s = splitProp str
         len = length str_s
+
+-- helper function for parsing proposition
+splitProp :: String -> [String]
+splitProp "" = []
+splitProp str = aux [] "" str_striped
+  where  str_striped = if str!!0 == '(' then tail $ init str else str
+         aux acc word "" = if word == "" then acc else acc ++ [word]
+         aux acc word (c:str) | c == ' ' = if word == "" then aux acc "" str else aux (acc++[word]) "" str
+                              | c == '(' = let (word',str') = cutParentheses (c:str)
+                                           in aux (acc++[word']) "" str'
+                              | otherwise = aux acc (word ++ [c]) str
+
+-- helper function for parsing proposition
+cutParentheses :: String -> (String,String)
+cutPatentheses "" = ("","")
+cutParentheses (_:str) = aux 1 "(" str
+  where aux 0 acc str = (acc,str)
+        aux _ acc ""  = (acc,"")
+        aux counter acc (c:str) = let acc' = acc ++ [c]
+                                  in case c of
+                                    '(' -> aux (counter + 1) acc' str
+                                    ')' -> aux (counter - 1) acc' str
+                                    _   -> aux counter acc' str
 
 -- ii) map tree into proposition
 
