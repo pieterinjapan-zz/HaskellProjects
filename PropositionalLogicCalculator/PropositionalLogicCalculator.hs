@@ -1,7 +1,7 @@
 {-
 Pieter van Wyk
 Created : 2019-05-24
-Updated : 2020-12-28
+Updated : 2020-12-29
 
 Implementation of a propositional logic calculator
 -}
@@ -27,7 +27,7 @@ instance Show Prop where
     Var x   -> [x]
     Not p   -> case p of
       Const b -> show (not b)
-      _       -> "(~" ++ show p ++ ")"
+      _       -> "~" ++ show p --"(~" ++ show p ++ ")"
     And p q -> showBinary p q " and "
     Or p q  -> showBinary p q " or "
     Imply p q -> showBinary p q " --> "
@@ -37,16 +37,17 @@ instance Show Prop where
 -- TODO : add read functionality, so proposition can be input as a String (String -> Prop)
 -- i) parse string into tree
 data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
- deriving (Show)
+ deriving (Show, Eq)
 
 -- main parser function
-parse :: String -> Tree String
-parse str | len == 1 = let h_str_s = head str_s
-                       in case h_str_s of
-                         '~':s -> Node1 "~" (parse s)
-                         _     -> Leaf h_str_s
-          | otherwise = let [prop_L,conector,prop_R] = str_s
-                        in Node2 conector (parse prop_L) (parse prop_R)
+parseTree :: String -> Tree String
+parseTree str | len == 1 = let h_str_s = head str_s
+                           in case h_str_s of
+                             '~':s -> Node1 "~" (parseTree s)
+                             _     -> Leaf h_str_s
+              | len == 2 = Node1 "~" (parseTree (str_s!!1))
+              | otherwise = let [prop_L,conector,prop_R] = str_s
+                            in Node2 conector (parseTree prop_L) (parseTree prop_R)
   where str_s = splitProp str
         len = length str_s
 
@@ -56,9 +57,13 @@ splitProp "" = []
 splitProp str = aux [] "" str_striped
   where  str_striped = if str!!0 == '(' then tail $ init str else str
          aux acc word "" = if word == "" then acc else acc ++ [word]
-         aux acc word (c:str) | c == ' ' = if word == "" then aux acc "" str else aux (acc++[word]) "" str
+         aux acc word (c:str) | c == ' ' = if word == ""
+                                           then aux acc "" str
+                                           else aux (acc++[word]) "" str
                               | c == '(' = let (word',str') = cutParentheses (c:str)
-                                           in aux (acc++[word']) "" str'
+                                           in if word == ""
+                                              then aux (acc++[word']) "" str'
+                                              else aux (acc++[word++word']) "" str'
                               | otherwise = aux acc (word ++ [c]) str
 
 -- helper function for parsing proposition
