@@ -10,6 +10,7 @@ into Prop.
 -}
 module PropositionalLogicCalculatorParser where
 import PropositionalLogicCalculator
+import Data.Char
 
 ------------------------------------------------
 -- Data Types and Instances :
@@ -17,19 +18,33 @@ import PropositionalLogicCalculator
 
 -- making Prop an intance of Show
 instance Show Prop where
-  show prop = case prop of
-    Const b -> show b
-    Var x   -> [x]
-    Not p   -> case p of
-      Const b -> show (not b)
-      _       -> "~" ++ show p --"(~" ++ show p ++ ")"
-    And p q -> showBinary p q " and "
-    Or p q  -> showBinary p q " or "
-    Imply p q -> showBinary p q " --> "
-    Eq  p q -> showBinary p q " <--> "
-    where showBinary p q str = "(" ++ show p ++ str ++ show q ++ ")"
+  show prop = stripOuterParentheses $ show' prop --if prop_str!!0 == '('
+              --then tail $ init prop_str
+              -- else prop_str
+    where --prop_str = show' prop
+          showBinary p q str = "(" ++ show' p ++ str ++ show' q ++ ")"
+          show' prop = case prop of
+            Const b -> show b
+            Var x   -> [x]
+            Not p   -> case p of
+              Const b -> show (not b)
+              _       -> "~" ++ show' p --"(~" ++ show p ++ ")"
+            And p q -> showBinary p q " and "
+            Or p q  -> showBinary p q " or "
+            Imply p q -> showBinary p q " --> "
+            Eq  p q -> showBinary p q " <--> "
 
 -- TODO : add read functionality, so proposition can be input as a String (String -> Prop)
+instance Read Prop where
+  readsPrec _ = readProp
+    where readProp prop_str = [(treeToProp $ parseTree prop_str,"")]
+          --prop = treeToProp $ parseTree prop_str
+
+
+--readProp :: String -> [(Prop, String)]
+--readProp prop_str = [(prop,"")]
+--  where prop = treeToProp $ parseTree prop_str
+
 
 -- tree datastructure used for parsing String into Prop
 data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
@@ -40,6 +55,21 @@ data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
 ------------------------------------------------
 
 -- i) parse string into tree
+
+-- helper function for stripping of redundant outer parentheses
+stripOuterParentheses :: String -> String
+stripOuterParentheses [] = []
+stripOuterParentheses [x] = [x]
+stripOuterParentheses str | head str == '(' && last str == ')' = if aux 0 striped_str
+                                                                 then striped_str
+                                                                 else str
+                          | otherwise = str
+  where striped_str = tail $ init str
+        aux _ [] = True
+        aux n (c:str) | n < 0 = False
+                      | c == '(' = aux (n + 1) str
+                      | c == ')' = aux (n - 1) str
+                      | otherwise = aux n str
 
 -- parse string representing proposition into Tree
 parseTree :: String -> Tree String
@@ -57,7 +87,7 @@ parseTree str | len == 1 = let h_str_s = head str_s
 splitProp :: String -> [String]
 splitProp "" = []
 splitProp str = aux [] "" str_striped
-  where  str_striped = if str!!0 == '(' then tail $ init str else str
+  where  str_striped = stripOuterParentheses str -- if str!!0 == '(' then tail $ init str else str
          aux acc word "" = if word == "" then acc else acc ++ [word]
          aux acc word (c:str) | c == ' ' = if word == ""
                                            then aux acc "" str
@@ -81,5 +111,17 @@ cutParentheses (_:str) = aux 1 "(" str
                                     _   -> aux counter acc' str
 
 -- ii) map tree into proposition
+treeToProp :: Tree String -> Prop
+treeToProp (Leaf a) = case a of
+  "True" -> Const True
+  "False" -> Const False
+  _       -> Var (toUpper $ a!!0)
+treeToProp (Node1 neg tree) = Not (treeToProp tree)
+treeToProp (Node2 connector treeL treeR) = case connector of
+  "and" -> And (treeToProp treeL) (treeToProp treeR)
+  "or" -> Or (treeToProp treeL) (treeToProp treeR)
+  "-->" -> Imply (treeToProp treeL) (treeToProp treeR)
+  "<-->" -> Eq (treeToProp treeL) (treeToProp treeR)
+  _ -> error "incorrect representation for proposition"
 
 -- END
