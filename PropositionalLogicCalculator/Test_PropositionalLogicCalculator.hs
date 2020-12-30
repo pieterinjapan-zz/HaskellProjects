@@ -6,6 +6,7 @@ Updated : 2020-12-29
 Unit and property tests for propositional logic calculator
 -}
 import PropositionalLogicCalculator
+import PropositionalLogicCalculatorParser
 import Test.QuickCheck
 
 -- Helper Functions --
@@ -61,19 +62,19 @@ test_p_show_15 = show p_show_15 == p_read_15
 p_read_00 = "True"
 p_read_01 = "False"
 p_read_02 = "True"
-p_read_03 = "~A" -- "(~A)"
+p_read_03 = "~A"
 p_read_04 = "(A and B)"
 p_read_05 = "(A or B)"
 p_read_06 = "(A --> B)"
 p_read_07 = "(A <--> B)"
-p_read_08 =  "(A or ~A)" -- "(A or (~A))"
-p_read_09 = "~(A and ~A)" -- "(~(A and (~A)))"
-p_read_10 = "(~~A <--> A)" --"((~(~A)) <--> A)"
+p_read_08 =  "(A or ~A)"
+p_read_09 = "~(A and ~A)"
+p_read_10 = "(~~A <--> A)"
 p_read_11 = "(((A --> B) --> A) --> A)"
-p_read_12 = "(~(A and B) <--> (~A or ~B))" -- "((~(A and B)) <--> ((~A) or (~B)))"
-p_read_13 = "(~(A or B) <--> (~A and ~B))" -- "((~(A or B)) <--> ((~A) and (~B)))"
-p_read_14 = "((A --> B) <--> (~A or B))" -- "((A --> B) <--> ((~A) or B))"
-p_read_15 = "((A <--> B) <--> ((A and B) or (~A and ~B)))" --"((A <--> B) <--> ((A and B) or ((~A) and (~B))))"
+p_read_12 = "(~(A and B) <--> (~A or ~B))"
+p_read_13 = "(~(A or B) <--> (~A and ~B))"
+p_read_14 = "((A --> B) <--> (~A or B))"
+p_read_15 = "((A <--> B) <--> ((A and B) or (~A and ~B)))"
 
 p_parseTree_00 = Leaf "True"
 p_parseTree_01 = Leaf "False"
