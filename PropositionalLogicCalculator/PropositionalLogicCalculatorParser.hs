@@ -38,13 +38,6 @@ instance Show Prop where
 instance Read Prop where
   readsPrec _ = readProp
     where readProp prop_str = [(treeToProp $ parseTree prop_str,"")]
-          --prop = treeToProp $ parseTree prop_str
-
-
---readProp :: String -> [(Prop, String)]
---readProp prop_str = [(prop,"")]
---  where prop = treeToProp $ parseTree prop_str
-
 
 -- tree datastructure used for parsing String into Prop
 data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
@@ -113,15 +106,15 @@ cutParentheses (_:str) = aux 1 "(" str
 -- ii) map tree into proposition
 treeToProp :: Tree String -> Prop
 treeToProp (Leaf a) = case a of
-  "True" -> Const True
+  "True"  -> Const True
   "False" -> Const False
   _       -> Var (toUpper $ a!!0)
 treeToProp (Node1 neg tree) = Not (treeToProp tree)
 treeToProp (Node2 connector treeL treeR) = case connector of
-  "and" -> And (treeToProp treeL) (treeToProp treeR)
-  "or" -> Or (treeToProp treeL) (treeToProp treeR)
-  "-->" -> Imply (treeToProp treeL) (treeToProp treeR)
+  "and"  -> And (treeToProp treeL) (treeToProp treeR)
+  "or"   -> Or (treeToProp treeL) (treeToProp treeR)
+  "-->"  -> Imply (treeToProp treeL) (treeToProp treeR)
   "<-->" -> Eq (treeToProp treeL) (treeToProp treeR)
-  _ -> error "incorrect representation for proposition"
+  _      -> error "incorrect representation for proposition"
 
 -- END

@@ -11,9 +11,13 @@ module PropositionalLogicCalculator where
 -- Data Types and Instances :
 ------------------------------------------------
 
+-- synonym type for atomic proposition
+type Atom = Char
+
 -- data type for logical propositions, and operations on them :
 data Prop = Const Bool       -- truth value
-          | Var Char         -- name of proposition
+          -- | Var Char         -- name of proposition
+          | Var Atom         -- name of proposition
           | Not Prop         -- negation
           | And Prop Prop    -- conjucntion
           | Or  Prop Prop    -- disjunction
@@ -29,7 +33,8 @@ instance Eq Prop where
 
 -- associating boolean values to propositions :
 type Assoc k v = [(k,v)]
-type Subst = Assoc Char Bool -- ex [('A',True)] assigns True to 'A'
+type Subst = Assoc Atom Bool -- ex [('A',True)] assigns True to 'A'
+--type Subst = Assoc Char Bool -- ex [('A',True)] assigns True to 'A'
 
 ------------------------------------------------
 -- Functions :
@@ -68,7 +73,8 @@ eval s ( Imply p q ) = ( not ( eval s p ) ) || ( eval s q )
 eval s ( Eq  p q )   = ( eval s p ) == ( eval s q )
 
 -- function for extracting atomic proposition names from a composite proposition
-vars :: Prop -> [Char]
+--vars :: Prop -> [Char]
+vars :: Prop -> [Atom]
 vars ( Const _ )   = []
 vars ( Var x )     = [x]
 vars ( Not p )     = vars p
