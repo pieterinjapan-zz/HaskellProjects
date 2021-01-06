@@ -1,15 +1,16 @@
 {-
 Pieter van Wyk
 Created : 2019-12-29
-Updated : 2020-12-29
+Updated : 2021-01-06
 
 Parser for propositional logic calculator.
 Functionality for mapping Prop into String,
-and mapping string representing proposition
+and mapping String representing proposition
 into Prop.
 -}
-module PropositionalLogicCalculatorParser where
-import PropositionalLogicCalculator
+module PLCParser where
+import PLCData
+import PLCEngine
 import Data.Char
 
 ------------------------------------------------
@@ -40,8 +41,8 @@ instance Read Prop where
     where readProp prop_str = [(treeToProp $ parseTree prop_str,"")]
 
 -- tree datastructure used for parsing String into Prop
-data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
- deriving (Show, Eq)
+--data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
+-- deriving (Show, Eq)
 
 ------------------------------------------------
 -- Functions :

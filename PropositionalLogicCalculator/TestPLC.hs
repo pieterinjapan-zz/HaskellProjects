@@ -1,12 +1,14 @@
 {-
 Pieter van Wyk
 Created : 2019-05-24
-Updated : 2020-12-29
+Updated : 2021-01-06
 
 Unit and property tests for propositional logic calculator
 -}
-import PropositionalLogicCalculator
-import PropositionalLogicCalculatorParser
+import PLCData
+import PLCEngine
+import PLCParser
+import PLCDisplay
 import Test.QuickCheck
 
 -- Helper Functions --

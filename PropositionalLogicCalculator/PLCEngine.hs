@@ -1,28 +1,16 @@
 {-
 Pieter van Wyk
 Created : 2019-05-24
-Updated : 2020-12-29
+Updated : 2021-01-06
 
 Implementation of a propositional logic calculator
 -}
-module PropositionalLogicCalculator where
+module PLCEngine where
+import PLCData
 
 ------------------------------------------------
--- Data Types and Instances :
+-- Instances :
 ------------------------------------------------
-
--- synonym type for atomic proposition
-type Atom = Char
-
--- data type for logical propositions, and operations on them :
-data Prop = Const Bool       -- truth value
-          -- | Var Char         -- name of proposition
-          | Var Atom         -- name of proposition
-          | Not Prop         -- negation
-          | And Prop Prop    -- conjucntion
-          | Or  Prop Prop    -- disjunction
-          | Imply Prop Prop  -- implication
-          | Eq Prop Prop     -- equivalence
 
 -- make Prop an intance of Eq
 {- here we declare two propositions to be
@@ -30,11 +18,6 @@ data Prop = Const Bool       -- truth value
    table -}
 instance Eq Prop where
   p == q = truthTable p == truthTable q
-
--- associating boolean values to propositions :
-type Assoc k v = [(k,v)]
-type Subst = Assoc Atom Bool -- ex [('A',True)] assigns True to 'A'
---type Subst = Assoc Char Bool -- ex [('A',True)] assigns True to 'A'
 
 ------------------------------------------------
 -- Functions :
