@@ -22,6 +22,20 @@ showTestResult' b str | b = "Pass: " ++ str
 showTestResult :: Bool -> String -> IO ()
 showTestResult b str = putStrLn $ showTestResult' b str
 
+-- run property test
+runPropertyTest :: Testable p => p -> String -> IO ()
+runPropertyTest prop str = do
+  putStrLn str
+  quickCheck (withMaxSuccess 10000 prop)
+  putStrLn ""
+
+-- helper function for property tests of read
+modifyString :: String -> String -> String
+modifyString str alt_str = let s = [c | c <- (concat $ words str), c /= '(', c /= ')', c /= '~']
+                           in if elem s ["","and","or","-->","<-->"]
+                              then alt_str
+                              else s
+
 -- Test Data --
 ---------------
 
@@ -29,19 +43,19 @@ showTestResult b str = putStrLn $ showTestResult' b str
 p_show_00 = Const True
 p_show_01 = Const False
 p_show_02 = Not p_show_01
-p_show_03 = Not (Var 'A')
-p_show_04 = And (Var 'A') (Var 'B')
-p_show_05 = Or (Var 'A') (Var 'B')
-p_show_06 = Imply (Var 'A') (Var 'B')
-p_show_07 = Eq (Var 'A') (Var 'B')
-p_show_08 = Or (Var 'A') (Not (Var 'A'))
-p_show_09 = Not (And (Var 'A') (Not (Var 'A')))
-p_show_10 = Eq (Not (Not (Var 'A'))) (Var 'A')
-p_show_11 = Imply (Imply (Imply (Var 'A') (Var 'B')) (Var 'A')) (Var 'A')
-p_show_12 = Eq (Not (And (Var 'A') (Var 'B'))) (Or (Not (Var 'A')) (Not (Var 'B')))
-p_show_13 = Eq (Not (Or (Var 'A') (Var 'B'))) (And (Not (Var 'A')) (Not (Var 'B')))
-p_show_14 = Eq (Imply (Var 'A') (Var 'B')) (Or (Not (Var 'A')) (Var 'B'))
-p_show_15 = Eq (Eq (Var 'A') (Var 'B')) (Or (And (Var 'A') (Var 'B')) (And (Not (Var 'A')) (Not (Var 'B'))))
+p_show_03 = Not (Var "A")
+p_show_04 = And (Var "A") (Var "B")
+p_show_05 = Or (Var "A") (Var "B")
+p_show_06 = Imply (Var "A") (Var "B")
+p_show_07 = Eq (Var "A") (Var "B")
+p_show_08 = Or (Var "A") (Not (Var "A"))
+p_show_09 = Not (And (Var "A") (Not (Var "A")))
+p_show_10 = Eq (Not (Not (Var "A"))) (Var "A")
+p_show_11 = Imply (Imply (Imply (Var "A") (Var "B")) (Var "A")) (Var "A")
+p_show_12 = Eq (Not (And (Var "A") (Var "B"))) (Or (Not (Var "A")) (Not (Var "B")))
+p_show_13 = Eq (Not (Or (Var "A") (Var "B"))) (And (Not (Var "A")) (Not (Var "B")))
+p_show_14 = Eq (Imply (Var "A") (Var "B")) (Or (Not (Var "A")) (Var "B"))
+p_show_15 = Eq (Eq (Var "A") (Var "B")) (Or (And (Var "A") (Var "B")) (And (Not (Var "A")) (Not (Var "B"))))
 
 -- test propositions for read
 p_read_00 = "True"
@@ -80,10 +94,9 @@ p_parseTree_14 = Node2 "<-->" (Node2 "-->" (Leaf "A") (Leaf "B")) (Node2 "or" (N
 p_parseTree_15 = Node2 "<-->" (Node2 "<-->" (Leaf "A") (Leaf "B"))
                  (Node2 "or" (Node2 "and" (Leaf "A") (Leaf "B")) (Node2 "and" (Node1 "~" (Leaf "A")) (Node1 "~" (Leaf "B"))))
 
-
 -- test propositions for tautology checker
-p_A =  Var 'A'
-p_B =  Var 'B'
+p_A =  Var "A"
+p_B =  Var "B"
 
 -- tautologies
 p_tau_00 = p_A \/ (neg p_A) -- Principle of Excluded Middle
@@ -206,6 +219,27 @@ prop_showTestResult_00 b str | b = result == "Pass: " ++ str
                              | otherwise = result == "Fail: " ++ str
   where result = showTestResult' b str
 
+-- property test for read
+prop_read_00 :: String -> Bool
+prop_read_00 str1 = prop1 == prop2
+  where str1' = modifyString str1 "A"
+        prop_str = "~" ++ str1'
+        prop1 = Not (Var str1')
+        prop2 = read prop_str :: Prop
+
+prop_read_binary :: (Prop -> Prop -> Prop) -> String -> String -> String -> Bool
+prop_read_binary op op_str str1 str2 = prop1 == prop2
+  where str1' = modifyString str1 "A"
+        str2' = modifyString str2 "B"
+        prop_str = str1' ++ op_str ++ str2'
+        prop1 = op (Var str1') (Var str2')
+        prop2 = read prop_str :: Prop
+
+prop_read_01 = prop_read_binary And " and "
+prop_read_02 = prop_read_binary Or " or "
+prop_read_03 = prop_read_binary Imply " --> "
+prop_read_04 = prop_read_binary Eq " <--> "
+
 main = do
   -- unit tests -
   ---------------
@@ -307,5 +341,15 @@ main = do
 
   -- property-based tests -
   -------------------------
-  putStrLn "test prop_showTestResult_00"
-  quickCheck (withMaxSuccess 10000 prop_showTestResult_00)
+
+  -- tests for showTestResult
+  runPropertyTest prop_showTestResult_00 "test prop_showTestResult_00"
+
+  -- tests for read
+  runPropertyTest prop_read_00 "test prop_read_00: Not"
+  runPropertyTest prop_read_01 "test prop_read_01: And"
+  runPropertyTest prop_read_02 "test prop_read_02: Or"
+  runPropertyTest prop_read_03 "test prop_read_03: Imply"
+  runPropertyTest prop_read_04 "test prop_read_04: Eq"
+
+-- END

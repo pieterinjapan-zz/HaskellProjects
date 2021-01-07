@@ -10,7 +10,6 @@ into Prop.
 -}
 module PLCParser where
 import PLCData
-import PLCEngine
 import Data.Char
 
 ------------------------------------------------
@@ -19,30 +18,23 @@ import Data.Char
 
 -- making Prop an intance of Show
 instance Show Prop where
-  show prop = stripOuterParentheses $ show' prop --if prop_str!!0 == '('
-              --then tail $ init prop_str
-              -- else prop_str
-    where --prop_str = show' prop
-          showBinary p q str = "(" ++ show' p ++ str ++ show' q ++ ")"
+  show prop = stripOuterParentheses $ show' prop
+    where showBinary p q str = "(" ++ show' p ++ str ++ show' q ++ ")"
           show' prop = case prop of
             Const b -> show b
-            Var x   -> [x]
+            Var x   -> x -- map toUpper x
             Not p   -> case p of
               Const b -> show (not b)
-              _       -> "~" ++ show' p --"(~" ++ show p ++ ")"
+              _       -> "~" ++ show' p
             And p q -> showBinary p q " and "
             Or p q  -> showBinary p q " or "
             Imply p q -> showBinary p q " --> "
             Eq  p q -> showBinary p q " <--> "
 
--- TODO : add read functionality, so proposition can be input as a String (String -> Prop)
+-- making Prop an intance of Read
 instance Read Prop where
   readsPrec _ = readProp
     where readProp prop_str = [(treeToProp $ parseTree prop_str,"")]
-
--- tree datastructure used for parsing String into Prop
---data Tree a = Leaf a | Node1 a (Tree a) | Node2 a (Tree a) (Tree a)
--- deriving (Show, Eq)
 
 ------------------------------------------------
 -- Functions :
@@ -109,7 +101,7 @@ treeToProp :: Tree String -> Prop
 treeToProp (Leaf a) = case a of
   "True"  -> Const True
   "False" -> Const False
-  _       -> Var (toUpper $ a!!0)
+  _       -> Var a -- (map toUpper a)
 treeToProp (Node1 neg tree) = Not (treeToProp tree)
 treeToProp (Node2 connector treeL treeR) = case connector of
   "and"  -> And (treeToProp treeL) (treeToProp treeR)

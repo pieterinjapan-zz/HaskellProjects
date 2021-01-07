@@ -12,7 +12,8 @@ module PLCData where
 ------------------------------------------------
 
 -- synonym type for atomic proposition
-type Atom = Char
+--type Atom = Char
+type Atom = String
 
 -- data type for logical propositions, and operations on them
 data Prop = Const Bool       -- truth value

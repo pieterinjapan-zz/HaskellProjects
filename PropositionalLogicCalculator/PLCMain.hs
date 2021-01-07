@@ -6,7 +6,6 @@ Updated : 2021-01-06
 Main function for propositional logic calculator
 -}
 module PLCMain where
-import PLCData
 import PLCDisplay
 
 -- TODO : impliment main function
