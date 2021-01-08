@@ -1,12 +1,13 @@
 {-
 Pieter van Wyk
 Created : 2019-05-24
-Updated : 2021-01-06
+Updated : 2021-01-08
 
 Implementation of a propositional logic calculator
 -}
 module PLCEngine where
 import PLCData
+import PLCParser
 
 ------------------------------------------------
 -- Instances :
@@ -93,6 +94,12 @@ truthTable p = ( map (\s -> eval s p) . subst ) p
 -- test whether given proposition is a tautology
 isTautology :: Prop -> Bool
 isTautology = and . truthTable
+
+isTautology_parser :: String -> String
+isTautology_parser prop_str | result = "Is a tautology\n\n"
+                            | otherwise = "Is not a tautology\n\n"
+  where result = isTautology prop
+        prop = read prop_str :: Prop
 
 -- TODO : add equivalence checker
 
