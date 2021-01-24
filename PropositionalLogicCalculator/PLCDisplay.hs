@@ -62,6 +62,8 @@ choose_operation_displayer = do
 
 -- TODO : add display for equivalece checker
 
+-- TODO : use random number to choose example from a list when showing example input
+
 -- display for tautology checker
 isTaautology_display_top = "-- Selected Tautology Checker -- \n" ++
                            "Please input proposition           "
